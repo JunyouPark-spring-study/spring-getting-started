@@ -1,16 +1,21 @@
 package hello.hello_spring.service;
 
 import hello.hello_spring.domain.Member;
+import hello.hello_spring.repository.MemberRepository;
 import hello.hello_spring.repository.MemoryMemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+
 public class MemberService {
     //Service의 코드는 Business 의존적으로 단어를 쓰는 게 좋음
-    private final MemoryMemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    public MemberService(MemoryMemberRepository memberRepository) {
+
+    public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
