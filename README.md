@@ -159,3 +159,77 @@ Setting ⇒ Build Tools ⇒ Gradle ⇒ Run, Test Java사용으로 바꾸기
 - **Thymeleaf** 사용: **`th:text`**, **`th:each`**로 동적 HTML 생성
 - **PRG 패턴**: POST 후 리다이렉트(**`redirect:/`**) 적용
 - **MVC 구조**: 컨트롤러 → 서비스 → 리포지토리 계층 분리
+
+  ---
+
+  ## **6. 스프링 DB 접근 기술 요약**
+
+### **🛠️ H2 데이터베이스 설정**
+
+- **개발용 경량 DB**로 웹 콘솔 제공
+- **버전 호환성**:
+    - 스프링 부트 2.x → H2 **1.4.200**
+    - 스프링 부트 3.x → H2 **2.1.214+**
+- **연결 설정**:
+    
+    ```
+    spring.datasource.url=jdbc:h2:tcp://localhost/~/test
+    spring.datasource.username=sa
+    ```
+    
+
+### **📊 JDBC 기술**
+
+1. **순수 JDBC**
+    - **`DataSource`** 주입 후 **`Connection`**, `PreparedStatement`로 SQL 직접 처리
+    - **단점**: 반복 코드 다량 발생, 리소스 수동 관리 (**`try-catch-finally`**)
+2. **스프링 JdbcTemplate**
+    - 반복 코드 제거 (예: **`RowMapper`**로 결과 매핑 간소화)
+    - SQL은 직접 작성 but 리소스 관리 자동화
+
+### **🔮 JPA 기술**
+
+- **객체 중심 설계** 지원 (SQL 자동 생성)
+- **엔터티 매핑**:
+    
+    ```
+    @Entity
+    public class Member {
+        @Id @GeneratedValue(strategy = IDENTITY)
+        private Long id;
+        private String name;
+    }
+    ```
+    
+- **트랜잭션 필수**: `@Transactional`로 메서드 단위 관리
+- **장점**: 생산성 ↑, 패러다임 전환 (SQL → 객체)
+
+### **✨ 스프링 데이터 JPA**
+
+- **인터페이스만으로 CRUD 구현**
+    
+    ```
+    public interface MemberRepository extends JpaRepository<Member, Long> {
+        Optional<Member> findByName(String name);  // 메서드명으로 쿼리 자동 생성
+    }
+    ```
+    
+- **기능**:
+    - 기본 CRUD 자동 제공
+    - 메서드 네이밍 규칙으로 조회/페이징 처리
+    - 실무 필수 기술 (복잡한 쿼리는 `Querydsl` 활용)
+
+### **🔄 기술 전환 비교**
+
+| **기술** | **코드량** | **SQL 관리** | **생산성** | **학습 곡선** |
+| --- | --- | --- | --- | --- |
+| **순수 JDBC** | 많음 | 직접 | 낮음 | 낮음 |
+| **JdbcTemplate** | 중간 | 직접 | 중간 | 중간 |
+| **JPA** | 적음 | 자동 | 높음 | 높음 |
+| **스프링 데이터 JPA** | 최소 | 자동 | 최고 | 높음 |
+
+### **⚠️ 주의사항**
+
+- **H2 접근 문제**: URL에 `localhost` 명시 필요
+- **트랜잭션**: JPA 사용 시 `@Transactional` 필수 적용
+- **테스트**: `@SpringBootTest` + `@Transactional`로 데이터 격리
