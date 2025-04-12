@@ -25,7 +25,7 @@ class MemoryMemberRepositoryTest {
         member.setName("spring");
 
         repository.save(member);
-        Member result = repository.findbyId(member.getId()).get();
+        Member result = repository.findById(member.getId()).get();
         //아래의 두 개의 코드는 동일한 의미를 가진다.
         //Assertions.assertEquals(member,result);
         assertThat(member).isEqualTo(result);
@@ -41,7 +41,7 @@ class MemoryMemberRepositoryTest {
         member2.setName("spring2");
         repository.save(member2);
 
-        Member result = repository.findbyName("spring1").get();
+        Member result = repository.findByName("spring1").get();
         assertThat(result).isEqualTo(member1);
         //assertThat(result).isEqualTo(member2);
     }
