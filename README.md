@@ -1,3 +1,62 @@
+<details>
+<summary><b>📌 기본 애노테이션 (클릭하여 펼치기)</b></summary>
+
+| 애노테이션 | 설명 |
+|-----------|------|
+| `@SpringBootApplication` | 스프링 부트 애플리케이션의 메인 클래스에 사용 |
+| `@Component` | 스프링 빈으로 등록할 클래스 표시 |
+| `@Autowired` | 의존성 자동 주입 (생성자/필드/메서드) |
+| `@Controller` | MVC 컨트롤러 클래스 표시 |
+| `@Service` | 비즈니스 로직 서비스 클래스 표시 |
+| `@Repository` | 데이터 액세스 계층 클래스 표시 |
+
+</details>
+
+<details>
+<summary><b>⚙️ 설정 관련 (클릭하여 펼치기)</b></summary>
+
+| 애노테이션 | 설명 |
+|-----------|------|
+| `@Configuration` | 스프링 설정 클래스 표시 |
+| `@Bean` | 메서드 반환 객체를 빈으로 등록 |
+
+</details>
+
+<details>
+<summary><b>🧪 테스트 관련 (클릭하여 펼치기)</b></summary>
+
+| 애노테이션 | 설명 |
+|-----------|------|
+| `@SpringBootTest` | 통합 테스트용 전체 컨텍스트 로드 |
+| `@Transactional` | 테스트 후 자동 롤백 |
+| `@Test` | 테스트 메서드 표시 |
+| `@BeforeEach` | 각 테스트 전 실행 메서드 |
+| `@AfterEach` | 각 테스트 후 실행 메서드 |
+
+</details>
+
+<details>
+<summary><b>🗄️ JPA 관련 (클릭하여 펼치기)</b></summary>
+
+| 애노테이션 | 설명 |
+|-----------|------|
+| `@Transactional` | JPA 작업 트랜잭션 처리 |
+| `@Entity` | JPA 엔터티 클래스 표시 |
+| `@Id` | 엔터티 기본 키 필드 표시 |
+| `@GeneratedValue` | 기본 키 생성 전략 지정 |
+
+</details>
+
+<details>
+<summary><b>🔄 AOP 관련 (클릭하여 펼치기)</b></summary>
+
+| 애노테이션 | 설명 |
+|-----------|------|
+| `@Aspect` | AOP Aspect 클래스 표시 |
+| `@Around` | 메서드 실행 전후 로직 처리 |
+
+</details>
+
 ## 1. 프로젝트 환경 설정
 
 [Spring Boot Starter](https://start.spring.io) 사용해서 프로젝트 생성
@@ -233,3 +292,64 @@ Setting ⇒ Build Tools ⇒ Gradle ⇒ Run, Test Java사용으로 바꾸기
 - **H2 접근 문제**: URL에 `localhost` 명시 필요
 - **트랜잭션**: JPA 사용 시 `@Transactional` 필수 적용
 - **테스트**: `@SpringBootTest` + `@Transactional`로 데이터 격리
+
+---
+
+## **7. AOP 요약**
+
+### **🔍 AOP가 필요한 상황**
+
+- **공통 관심 사항(cross-cutting concern)**: 여러 메서드에 걸쳐 반복되는 로직 (예: 시간 측정, 로깅, 트랜잭션)
+- **핵심 관심 사항(core concern)**: 비즈니스 로직 (예: 회원 가입, 조회)
+- **문제점**:
+    - 공통 로직이 핵심 로직과 섞여 유지보수 어려움
+    - 변경 시 모든 메서드를 수정해야 함
+
+### **⚙️ AOP 적용 방법**
+
+1. **Aspect 정의**:
+    - **`@Aspect`**로 클래스 표시
+    - **`@Around`**로 적용 범위 지정 (예: **`execution(* 패키지..*(..))`**)
+    
+    java
+    
+    Copy
+    
+    ```
+    @Component
+    @Aspect
+    public class TimeTraceAop {
+        @Around("execution(* hello.hellospring..*(..))")
+        public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
+            long start = System.currentTimeMillis();
+            try {
+                return joinPoint.proceed(); // 핵심 로직 실행
+            } finally {
+                long duration = System.currentTimeMillis() - start;
+                System.out.println(joinPoint + " 실행 시간: " + duration + "ms");
+            }
+        }
+    }
+    ```
+    
+2. **분리된 공통 로직**:
+    - 시간 측정, 로깅 등 공통 기능을 한 곳에서 관리
+    - 핵심 로직은 깔끔하게 유지
+
+### **🔄 AOP 동작 방식**
+
+- **프록시 패턴**:
+    - 스프링은 AOP 적용 시 대상 객체의 프록시를 생성
+    - **`memberService`** 호출 시 실제 객체 대신 프록시가 먼저 실행
+    - 프록시에서 공통 로직 처리 후 실제 메서드 호출 (**`joinPoint.proceed()`**)
+
+### **✅ AOP 장점**
+
+- **유지보수성 향상**: 공통 로직 중앙 집중화
+- **변경 용이성**: 공통 로직만 수정하면 전체 적용
+- **코드 간결성**: 핵심 로직에만 집중 가능
+
+### **📌 주의 사항**
+
+- AOP는 **스프링 빈에만 적용** 가능 (직접 생성한 객체에는 불가)
+- **`@Around`**의 포인트컷 표현식으로 적용 대상 제어 가능
